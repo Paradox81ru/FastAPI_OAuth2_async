@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестирование OAuth2 - главная</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="{{ url_for('static', path='/index.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="main-wrap m-4">
+        <h1>Главная страница проверки авторизации OAuth2</h1>
+        <div id="alertDanger" class="alert alert-danger d-none" role="alert">
+            Ошибка:
+          </div>
+        <div class="container-fluid">
+            <div id="tokenBlock" class="mb-3 row">
+                <form method="post"class="col">
+                    <div class="mb-3 row">
+                        <div class="col">
+                            <label for="token" class="col-2 col-form-label">Токен доступа:</label>
+                            <textarea id="token" name="token" placeholder="token" class="form-control"  rows="3"></textarea>
+                        </div>
+                    </div>
+                    <button id="btn_request" type="button" class="btn btn-primary"> Получить информацию пользователя </button>
+                </form>
+            </div>
+            <div id="infoBlock" class="mb-3 row">
+                <div class="col user-info-col">
+                    <label for="token" class="col col-form-label text-center">Информация о пользователе:</label>
+                    <textarea id="user_info" name="token" class="form-control" rows="18"></textarea>
+                </div>
+                <div class="col rights-verification-col">
+                    <div class="mb-3 row"><label class="col-form-label text-center">Проверка прав:</label></div>
+                </div>
+            </div>
+        </div>
+        <script src="{{ url_for('static', path='/index.js') }}"></script>
+        <script src="{{ url_for('static', path='/rights_verification.js') }}"></script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  oauth2:
+    build: OAuth2/
+    ports:
+      - 8001:8001
+    environment:
+      # Секретный ключ для шифрования и дешифрования токена.
+      SECRET_KEY: "11dcfbb19316b6104037b2ec8d6d0179b89f55a93da4594e4971d96df5feae21"
+      # Время жизни токена доступа.
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10
+      # Время жизни токена обновления.
+      REFRESH_TOKEN_EXPIRE_MINUTES: 60
+      # Соединение с базой данных.
+      DB_CONNECT_STR: "sqlite:///db.sqlite3"
+      
+      # Данные для инициализации пользователей в бае данных.
+      INIT_ADMIN_EMAIL: "admin@yandex.ru"
+      INIT_SYSTEM_EMAIL: "system@gmail.com"
+      INIT_DIRECTOR_LOGIN: "Boroda"
+      INIT_DIRECTOR_NAME: "Фёдор"
+      INIT_DIRECTOR_LASTNAME: "Петрович"
+      INIT_DIRECTOR_EMAIL: "boroda@mail.ru"
+      INIT_USER_LOGIN: "Pups"
+      INIT_USER_NAME: "Малой"
+      INIT_USER_LASTNAME: ""
+      INIT_USER_EMAIL: "pups@hotmail.com"
+
+      # Пароли для пользователей при инициализации базы данных.
+      INIT_ADMIN_PASSWORD: "Pups_555"
+      INIT_SYSTEM_PASSWORD: "Pups_555"
+      INIT_DIRECTOR_PASSWORD: "Pups_555"
+      INIT_USER_PASSWORD: "Pups_555"
+
+      DEBUG_MODE: "true"
+      
+    command: >
+      sh -c "alembic upgrade head &&
+      uvicorn main:app --host 0.0.0.0 --port 8001"
+
+  oauth2_test:
+    build: OAuth2_test/
+    ports:
+      - 8000:8000
+    environment:
+      # Хост микросервиса авторизации.
+      AUTH_SERVER_HOST: "localhost"
+      # Порт микросервиса авторизации.
+      AUTH_SERVER_PORT: 8001
+
+      DEBUG_MODE: "true"
+      
+    command: uvicorn main:app --host 0.0.0.0 --port 8000    
+    network_mode: host
+    
+    depends_on:
+      - oauth2
