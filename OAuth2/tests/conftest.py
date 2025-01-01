@@ -4,10 +4,12 @@ from enum import StrEnum
 
 os.environ['IS_TEST'] = 'True'
 
+from httpx import ASGITransport, AsyncClient
 from fastapi.testclient import TestClient
 from main import app
 from config import get_settings
-from Auth.db.db_connection import db_session_async as session
+from Auth.db.db_connection import engine_async
+from sqlalchemy.ext.asyncio import AsyncSession
 import alembic.config
 import alembic.environment
 
@@ -31,16 +33,16 @@ class UserAuth:
     password: str
 
 
-def get_access_token(client: TestClient, user_auth: UserAuth, scope: list[str]):
+async def get_access_token(async_client: AsyncClient, user_auth: UserAuth, scope: list[str]):
     """
     Возвращает токен авторизации.
-    :param client: Тестовый клиент.
+    :param async_client: Асинхронный тестовый клиент.
     :param user_auth: Логин и пароль пользователя.
     :param scope: Список scope при авторизации.
     :return: Токен доступа.
     """
     request_data = {'username': user_auth.username, 'password': user_auth.password, 'scope': " ".join(scope)}
-    response = client.post("/api/oauth/token", data=request_data)
+    response = await async_client.post("/api/oauth/token", data=request_data)
     return response.json()['access_token']
 
 
@@ -81,16 +83,22 @@ def setup():
 @pytest.fixture()
 async def db_session():
     """ Сессия для работы с базой данных. """
-    try:
+    async with AsyncSession(engine_async) as session:
         yield session
-    finally:
-        await session.close()
 
 
 @pytest.fixture()
 def client():
     """ Тестовый клиент. """
     return TestClient(app)
+
+@pytest.fixture()
+async def async_client(api_settings) -> AsyncClient:
+    """ Асинхронный тестовый клиент """
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+            base_url=f"http://test") as ac:
+        yield ac
 
 
 @pytest.fixture(scope='session')

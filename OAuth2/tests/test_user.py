@@ -86,8 +86,8 @@ class TestUser:
         assert new_user.email == 'new_user@mail.ru'
         assert new_user.role == UserRoles.visitor
         assert new_user.status == UerStatus.ACTIVE
-        user_manager.add_user(new_user)
 
+        await user_manager.add_user(new_user)
         find_new_user = await user_manager.get_user_by_username('NewUser')
         assert find_new_user.username == 'NewUser'
         assert find_new_user.email == 'new_user@mail.ru'

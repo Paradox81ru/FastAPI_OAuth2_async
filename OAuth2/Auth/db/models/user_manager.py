@@ -41,10 +41,10 @@ class UserManager(BaseManager):
         # return db.query(User).filter(User.jwt_tokens.contains(
         #     db.query(JWTToken).filter(JWTToken.jti == jti))).first()
 
-    def add_user(self, user: User):
+    async def add_user(self, user: User):
         """ Добавляет пользователя. """
         self._db_async.add(user)
-        self._db_async.commit()
+        await self._db_async.commit()
 
     def add_users(self, users: list[User]):
         """ Добавляет список пользователей. """

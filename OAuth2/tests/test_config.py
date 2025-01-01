@@ -8,4 +8,4 @@ def test_settings():
     assert 'IS_TEST' in os.environ and os.environ['IS_TEST'] == 'True'
     assert settings.access_token_expire_minutes == 1
     assert settings.refresh_token_expire_minutes == 5
-    assert settings.db_connect_str == 'sqlite:///db-test.sqlite3'
+    assert settings.db_connect_str == 'sqlite+aiosqlite:///db-test.sqlite3'

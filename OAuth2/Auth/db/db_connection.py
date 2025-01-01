@@ -10,4 +10,3 @@ engine = create_engine(settings.db_connect_str, echo=True)
 db_session = Session(engine)
 
 engine_async = create_async_engine(settings.db_connect_str, echo=settings.debug_mode)
-db_session_async = AsyncSession(engine_async)

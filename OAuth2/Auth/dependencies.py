@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
-from Auth.db.db_connection import db_session_async, db_session
+from Auth.db.db_connection import engine, engine_async
 from Auth.db.models.jwt_token_manager import JWTTokenManager
 from Auth.db.models.user_manager import UserManager
 from Auth.exceptions import AuthenticateException
@@ -22,16 +22,16 @@ def get_db_session():
     Есть проблемы при восстановлении миграции в Alembic в асинхронном режиме.
     Поэтому была оставлена синхронная сессия для работы с базой данных.
      """
-    yield db_session
-    db_session.close()
+    with Session(engine) as session:
+        yield session
 
-def get_db_session_async():
+async def get_db_session_async():
     """ Асинхронная сессия базы данных """
-    yield db_session_async
-    db_session_async.close()
+    async with AsyncSession(engine_async) as session:
+        yield session
 
 
-def _validate_token(session: AsyncSession, token: str, jwt_token_type: JWTTokenType) -> dict | None:
+async def _validate_token(session: AsyncSession, token: str, jwt_token_type: JWTTokenType) -> dict | None:
     """
     Проверят валидность токена, и если он валидный, то возвращает его содержимое.
     :param session: Сессия для работы с базой данных.
@@ -50,7 +50,7 @@ def _validate_token(session: AsyncSession, token: str, jwt_token_type: JWTTokenT
             raise AuthenticateException("The JWT token is damaged")
         jti: str = payload.get('jti')
         # Проверка, есть ли этот токен в базе.
-        if not jwt_token_manager.has_jwt_token(jti):
+        if not await jwt_token_manager.has_jwt_token(jti):
             # Если нет, то токен не валидный.
             raise AuthenticateException("Could not validate credentials")
         # Если в токене не указан пользователь, то токен не валидный.
@@ -62,7 +62,7 @@ def _validate_token(session: AsyncSession, token: str, jwt_token_type: JWTTokenT
         payload = jwt.decode(token, settings.secret_key.get_secret_value(), algorithms=['HS256'],
                              options={"verify_signature": False})
         # по которому он удаляется из базы данных.
-        jwt_token_manager.remove_jwt_token(payload.get('jti'))
+        await jwt_token_manager.remove_jwt_token(payload.get('jti'))
         raise AuthenticateException("The JWT token is expired")
     except (jwt.InvalidTokenError, ValidationError):
         raise AuthenticateException("The JWT token is damaged")
@@ -77,7 +77,7 @@ async def validate_access_token(session: Annotated[AsyncSession, Depends(get_db_
     :return: Раскодированное содержимое токена.
     :raises AuthenticateException:
     """
-    return _validate_token(session, token, JWTTokenType.ACCESS)
+    return await _validate_token(session, token, JWTTokenType.ACCESS)
 
 
 async def validate_refresh_token(session: Annotated[AsyncSession, Depends(get_db_session_async)],
@@ -89,7 +89,7 @@ async def validate_refresh_token(session: Annotated[AsyncSession, Depends(get_db
     :return: Раскодированное содержимое токена.
     :raises AuthenticateException:
     """
-    return _validate_token(session, token, JWTTokenType.REFRESH)
+    return await _validate_token(session, token, JWTTokenType.REFRESH)
 
 
 async def get_current_user_and_scope(session: Annotated[AsyncSession, Depends(get_db_session_async)],
