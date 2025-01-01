@@ -35,13 +35,6 @@ def create_logs_dir():
         parent_dir.mkdir()
 
 
-def create_logs_dir():
-    """ Проверяет наличие каталогов с логами, и если нет, создаёт ешл """
-    parent_dir = Path(LOGGER_FILENAME).parent
-    if not parent_dir.exists():
-        parent_dir.mkdir()
-
-
 class Settings(BaseSettings):
     """ Класс настроек. """
     auth_test_host: str = "localhost"

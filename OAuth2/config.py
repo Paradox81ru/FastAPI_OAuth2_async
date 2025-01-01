@@ -95,7 +95,7 @@ class Settings(BaseSettings):
 def get_pwd_context():
     """ Возвращает класс работы с паролем. """
     # pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-    # Почему то библиотека passlib не хочет работать, возможно проблема, давнее отсутствие поддержки данной библиотеки.
+    # Почему-то библиотека passlib не хочет работать, возможно проблема, давнее отсутствие поддержки данной библиотеки.
     pwd_context = PasswordHash.recommended()
     # По этой причине пока что используется более современная библиотека pwdlib.
     my_pwd_context = MyPwdContext(pwd_context)

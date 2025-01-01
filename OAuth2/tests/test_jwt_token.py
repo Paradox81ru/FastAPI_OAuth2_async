@@ -4,9 +4,8 @@ from typing import final
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
-from Auth.db.models.jwt_token_manager import JWTTokenManager, settings
+from Auth.db.models.jwt_token_manager import JWTTokenManager
 from Auth.db.models.user_manager import UserManager
 from config import Settings
 from tests.conftest import db_session

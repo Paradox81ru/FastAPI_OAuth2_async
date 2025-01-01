@@ -1,9 +1,6 @@
-import json
-
 import httpx
 from fastapi.requests import HTTPConnection
-from starlette.authentication import (AuthCredentials, AuthenticationBackend, AuthenticationError, BaseUser,
-                                      HTTPException)
+from starlette.authentication import (AuthCredentials, AuthenticationBackend, AuthenticationError, BaseUser)
 
 from config import get_logger
 from fastapi_site.schemas import AnonymUser, User

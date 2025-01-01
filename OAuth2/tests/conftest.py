@@ -5,7 +5,6 @@ from enum import StrEnum
 os.environ['IS_TEST'] = 'True'
 
 from httpx import ASGITransport, AsyncClient
-from fastapi.testclient import TestClient
 from main import app
 from config import get_settings
 from Auth.db.db_connection import engine_async

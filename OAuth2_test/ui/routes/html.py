@@ -1,4 +1,3 @@
-from config import templates
 from fastapi import APIRouter, Request
 
 from config import templates
