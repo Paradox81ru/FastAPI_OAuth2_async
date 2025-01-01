@@ -40,7 +40,7 @@ python-multipart
 PyYAML
 rich
 shellingham
-sniffiopip
+sniffio
 SQLAlchemy
 aiosqlite
 starlette

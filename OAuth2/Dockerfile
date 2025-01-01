@@ -11,7 +11,7 @@ ENV PIP_ROOT_USER_ACTION=ignore
 # Время жизни токена обновления.
 # ENV REFRESH_TOKEN_EXPIRE_MINUTES=60
 # Соединение с базой данных.
-# ENV DB_CONNECT_STR="sqlite:///db.sqlite3"
+# ENV DB_CONNECT_STR="sqlite+aiosqlite:///db.sqlite3"
 
 # Данные для инициализации пользователей в бае данных.
 # ENV INIT_ADMIN_EMAIL="admin@yandex.ru"
