@@ -115,7 +115,7 @@ async def get_current_user_and_scope(session: Annotated[AsyncSession, Depends(ge
     return user, scopes
 
 
-def check_scope(payload: Annotated[dict, Depends(validate_access_token)], security_scopes: SecurityScopes):
+async def check_scope(payload: Annotated[dict, Depends(validate_access_token)], security_scopes: SecurityScopes):
     """
     Проверяет scopes.
     :param payload: Раскодированное содержимое токена.
@@ -139,7 +139,7 @@ def check_role(allowed_roles: tuple[str, ...] | list[str] | list[UserRoles]):
     :param allowed_roles: Список ролей для проверки.
     :raises AuthenticateException: Не достаточно прав.
     """
-    def _check_role(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
+    async def _check_role(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
         user, scope = user_and_scope
         if user.role in allowed_roles:
             return
@@ -147,7 +147,7 @@ def check_role(allowed_roles: tuple[str, ...] | list[str] | list[UserRoles]):
     return _check_role
 
 
-def is_auth(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
+async def is_auth(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
     """
     Проверят на авторизованного пользователя.
     :param user_and_scope: Текущий пользователь и его scope
@@ -158,7 +158,7 @@ def is_auth(user_and_scope: Annotated[tuple[User, list], Depends(get_current_use
         raise AuthenticateException("Not authorized", "Bearer")
 
 
-def is_not_auth(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
+async def is_not_auth(user_and_scope: Annotated[tuple[User, list], Depends(get_current_user_and_scope)]):
     """
     Проверят на неавторизованного (анонимного) пользователя.
     :param user_and_scope: Текущий пользователь и его scope.

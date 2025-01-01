@@ -87,10 +87,10 @@ async def db_session():
         yield session
 
 
-@pytest.fixture()
-def client():
-    """ Тестовый клиент. """
-    return TestClient(app)
+# @pytest.fixture()
+# def client():
+#     """ Тестовый клиент. """
+#     return TestClient(app)
 
 @pytest.fixture()
 async def async_client(api_settings) -> AsyncClient:
