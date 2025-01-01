@@ -1,5 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from fastapi_site.schemas import UserRoles
 from tests.conftest import get_access_token, UserType
@@ -25,61 +25,61 @@ class TestScopeMe:
         """ Настройка теста. """
         cls.api = "/api/test/scope/me"
 
-    def test_scope_me(self, client: TestClient, oauth_server, users_data):
+    async def test_scope_me(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me' для пользователя авторизовавшегося со scope 'me'.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.USER]
-        token = get_access_token(user_auth, oauth_server, ['me'])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, ['me'])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.visitor.name, 'scopes': ['me']}
 
-    def test_scope_me_and_items(self, client: TestClient, oauth_server, users_data):
+    async def test_scope_me_and_items(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me' для пользователя авторизовавшегося со scope 'me' и 'items'.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, ['me', 'items'])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, ['me', 'items'])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.director.name, 'scopes': ['me', 'items']}
 
-    def test_note_scope_me(self, client: TestClient, oauth_server, users_data):
+    async def test_note_scope_me(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me' для пользователя авторизовавшегося только со scope 'items', но без scope 'me'.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, ['items'])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, ['items'])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not enough permissions'
 
-    def test_without_scope(self, client: TestClient, oauth_server, users_data):
+    async def test_without_scope(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me' для пользователя авторизовавшегося без установленного scope.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not enough permissions'
 
@@ -91,63 +91,63 @@ class TestScopeMeItems:
         """ Настройка теста. """
         cls.api = "/api/test/scope/me_items"
 
-    def test_scope_me_and_items(self, client: TestClient, oauth_server, users_data):
+    async def test_scope_me_and_items(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me_items' для пользователя авторизовавшегося со scope 'me'
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.USER]
-        token = get_access_token(user_auth, oauth_server, ['me', 'items'])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, ['me', 'items'])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.visitor.name, 'scopes': ['me', 'items']}
 
-    def test_scope_me(self, client: TestClient, oauth_server, users_data):
+    async def test_scope_me(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me_items' для пользователя авторизовавшегося только со scope 'me', но без scope 'items'.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, ['me'])
+        token = await get_access_token(user_auth, oauth_server, ['me'])
 
-        response = client.get(self.api, headers=get_headers(token))
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not enough permissions'
 
-    def test_scope_items(self, client: TestClient, oauth_server, users_data):
+    async def test_scope_items(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me_items' для пользователя авторизовавшегося только со scope 'items', но без scope 'me'.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, ['items'])
+        token = await get_access_token(user_auth, oauth_server, ['items'])
 
-        response = client.get(self.api, headers=get_headers(token))
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not enough permissions'
 
-    def test_without_scope(self, client: TestClient, oauth_server, users_data):
+    async def test_without_scope(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Проверяет 'api/scope/me_items' для пользователя авторизовавшегося без установленного scope
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, [])
+        token = await get_access_token(user_auth, oauth_server, [])
 
-        response = client.get(self.api, headers=get_headers(token))
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not enough permissions'
 
@@ -175,11 +175,11 @@ role_args = (
 
 @pytest.mark.parametrize('only_role, user_type, role_name', role_args,
                          ids=[f"Checks the 'only_{arg[0]}' by the {arg[1]} user"  for arg in role_args])
-def test_role(client: TestClient, oauth_server, users_data,
+async def test_role(async_client: AsyncClient, oauth_server, users_data,
               only_role: str, user_type: UserType, role_name: str | None):
     """
     Проверяет аутентификацию по роли.
-    :param client:Тестовый клиент.
+    :param async_client: Асинхронный тестовый клиент.
     :param oauth_server: Сервер авторизации.
     :param users_data: Данные для авторизации пользователя (логин и пароль).
     :param only_role: Тип аутентификации.
@@ -191,12 +191,12 @@ def test_role(client: TestClient, oauth_server, users_data,
     user_auth = ""
     if user_type != UserType.ANONYM:
         user_auth = users_data[user_type]
-        token = get_access_token(user_auth, oauth_server, [])
+        token = await get_access_token(user_auth, oauth_server, [])
         headers = get_headers(token)
     else:
         # Для анонимного пользователя указывать токен в заголовке не надо
         headers = {}
-    response = client.get(api, headers=headers)
+    response = await async_client.get(api, headers=headers)
     if role_name is not None:
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
@@ -214,58 +214,58 @@ class TestOnlyAuthorizedUser:
         """ Настройка теста. """
         cls.api = "/api/test/only_authorized_user"
 
-    def test_admin(self, client: TestClient, oauth_server, users_data):
+    async def test_admin(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с пользователем Администратор.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.ADMIN]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.admin.name}
 
-    def test_director(self, client: TestClient, oauth_server, users_data):
+    async def test_director(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с пользователем Директор.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.director.name}
 
-    def test_user(self, client: TestClient, oauth_server, users_data):
+    async def test_user(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с обычным пользователем.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.USER]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 200
         assert response.json() == {'status': 'ok', 'username': user_auth.username,
                                    'role': UserRoles.visitor.name}
 
-    def test_not_authorized(self, client: TestClient):
+    async def test_not_authorized(self, async_client: AsyncClient):
         """
         Тестирует api '/api/test/only_authorized_user' - без авторизации.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :raises AssertionError:
         """
-        response = client.get(self.api)
+        response = await async_client.get(self.api)
         assert response.status_code == 401
         assert response.json()['detail'] == 'Not authorized'
 
@@ -278,58 +278,58 @@ class TestOnlyAnonymUser:
         """ Настройка теста. """
         cls.api = "/api/test/only_anonym_user"
 
-    def test_not_authorized(self, client: TestClient):
+    async def test_not_authorized(self, async_client: AsyncClient):
         """
         Тестирует api '/api/test/only_authorized_user' - без авторизации.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :raises AssertionError:
         """
 
-        response = client.get(self.api)
+        response = await async_client.get(self.api)
         assert response.json() == {'status': 'ok', 'username': 'Anonym',
                                    'role': UserRoles.guest.name}
 
-    def test_admin(self, client: TestClient, oauth_server, users_data):
+    async def test_admin(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с пользователем Администратор.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.ADMIN]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert (response.json()['detail'] ==
                 f"Already authorized username '{user_auth.username}' role {UserRoles.admin.name}")
 
-    def test_director(self, client: TestClient, oauth_server, users_data):
+    async def test_director(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с пользователем Директор.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.DIRECTOR]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert (response.json()['detail'] ==
                 f"Already authorized username '{user_auth.username}' role {UserRoles.director.name}")
 
-    def test_user(self, client: TestClient, oauth_server, users_data):
+    async def test_user(self, async_client: AsyncClient, oauth_server, users_data):
         """
         Тестирует api '/api/test/only_authorized_user' - с обычным пользователем.
-        :param client: Тестовый клиент.
+        :param async_client: Асинхронный тестовый клиент.
         :param oauth_server: URL сервера авторизации.
         :param users_data: Данные для авторизации пользователя по типу пользователя (логин и пароль).
         :raises AssertionError:
         """
         user_auth = users_data[UserType.USER]
-        token = get_access_token(user_auth, oauth_server, [])
-        response = client.get(self.api, headers=get_headers(token))
+        token = await get_access_token(user_auth, oauth_server, [])
+        response = await async_client.get(self.api, headers=get_headers(token))
         assert response.status_code == 401
         assert (response.json()['detail'] ==
                 f"Already authorized username '{user_auth.username}' role {UserRoles.visitor.name}")

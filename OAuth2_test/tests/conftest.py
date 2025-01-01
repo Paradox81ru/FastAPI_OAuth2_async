@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 import httpx
+from httpx import ASGITransport, AsyncClient
 from dotenv import load_dotenv
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings
@@ -66,6 +67,14 @@ def client():
     """ Тестовый клиент. """
     return TestClient(app)
 
+@pytest.fixture()
+async def async_client(api_settings) -> AsyncClient:
+    """ Асинхронный тестовый клиент """
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+            base_url=f"http://test") as ac:
+        yield ac
+
 
 @pytest.fixture(scope='session')
 def api_settings():
@@ -107,7 +116,7 @@ def oauth_server(api_settings):
     return  f"http://{api_settings.auth_server_host}:{api_settings.auth_server_port}"
 
 
-def get_access_token(user_auth: UserAuth, oauth_server, scope: list[str]):
+async def get_access_token(user_auth: UserAuth, oauth_server, scope: list[str]):
     """
     Возвращает токен авторизации.
     :param user_auth: Логин и пароль пользователя.
@@ -117,6 +126,9 @@ def get_access_token(user_auth: UserAuth, oauth_server, scope: list[str]):
     """
     api_url = f"{oauth_server}/api/oauth/token"
     request_data = {'username': user_auth.username, 'password': user_auth.password, 'scope': " ".join(scope)}
-    with httpx.Client() as client:
-        response = client.post(api_url, data=request_data)
+    # with httpx.Client() as client:
+    #     response = client.post(api_url, data=request_data)
+    #     return response.json()['access_token']
+    async with httpx.AsyncClient() as client:
+        response = await client.post(api_url, data=request_data)
         return response.json()['access_token']
