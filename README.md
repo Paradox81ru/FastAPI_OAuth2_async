@@ -1,4 +1,4 @@
-# FastAPI_OAuth2
+# FastAPI_OAuth2_async
 
 ## Реализация на *FastAPI* авторизации на основе *JSON Web Token*
 
